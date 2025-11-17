@@ -47,8 +47,8 @@ def main():
                 if rock.collides_with(shot):
                     log_event('asteroid_shot')
                     shot.kill()
-                    rock.kill()
-                    
+                    rock.split()
+
         pygame.display.flip()
         dt = clock.tick(60) / 1000  # Convert milliseconds to seconds
 
