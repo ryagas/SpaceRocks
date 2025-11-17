@@ -1,7 +1,8 @@
+import sys
 import pygame
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
-from logger import log_state
+from logger import log_event, log_state
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from player import Player
 
@@ -34,6 +35,11 @@ def main():
             entity.update(dt)
         for entity in drawable:
             entity.draw(screen)
+        for rock in asteroids:
+            if rock.collides_with(player):
+                log_event('player_hit')
+                print('Game over!')
+                sys.exit()
         pygame.display.flip()
         dt = clock.tick(60) / 1000  # Convert milliseconds to seconds
 
