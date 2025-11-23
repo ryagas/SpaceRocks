@@ -6,4 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pygame==2.6.1",
+    "pytest>=8.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+pythonpath = ["."]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
