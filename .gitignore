@@ -11,3 +11,7 @@ wheels/
 
 # Logging
 game_state.jsonl
+
+# spec-related stuff
+.kilocode
+
