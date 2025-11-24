@@ -3,7 +3,7 @@ import json
 import math
 from datetime import datetime
 
-__all__ = ["log_state", "log_event"]
+__all__ = ["log_state", "log_event", "log_score_added", "log_combo_increased", "log_combo_reset"]
 
 _FPS = 60
 _MAX_SECONDS = 16
@@ -133,3 +133,25 @@ def log_event(event_type, **details):
         f.write(json.dumps(event) + "\n")
 
     _event_log_initialized = True
+
+
+def log_score_added(score, multiplier):
+    log_event(
+        "score_added",
+        score=score,
+        multiplier=multiplier,
+    )
+
+
+def log_combo_increased(multiplier):
+    log_event(
+        "combo_increased",
+        multiplier=multiplier,
+    )
+
+
+def log_combo_reset(multiplier):
+    log_event(
+        "combo_reset",
+        multiplier=multiplier,
+    )

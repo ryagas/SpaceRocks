@@ -2,10 +2,12 @@ import sys
 import pygame
 from classes.asteroid import Asteroid
 from classes.asteroidfield import AsteroidField
-from util.logger import log_event, log_state
+from score_display import ScoreDisplay
+from util.logger import log_event, log_score_added, log_state
 from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from classes.player import Player
 from classes.shot import Shot
+from classes.score_manager import ScoreManager
 
 def main():
     print("Starting Asteroids with pygame version: ", pygame.version.ver)
@@ -27,7 +29,9 @@ def main():
 
     asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-
+    score_manager = ScoreManager()
+    score_display = ScoreDisplay()
+    
     while True:
         log_state()
         for event in pygame.event.get():
@@ -48,6 +52,14 @@ def main():
                     log_event('asteroid_shot')
                     shot.kill()
                     rock.split()
+                    score_manager.add_score(rock.radius)
+                    current_score = score_manager.get_current_score()
+                    score_display.update_score(current_score)
+                    log_score_added(
+                        current_score, score_manager.get_combo_multiplier()
+                    )
+
+        score_display.render_surface(screen)
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000  # Convert milliseconds to seconds

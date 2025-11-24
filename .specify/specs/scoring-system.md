@@ -202,7 +202,7 @@ COMBO_POSITION = (10, 50)       # Below score
 
 ### Event Logging
 
-New events to log via [`logger.py`](logger.py):
+New events to log via [`logger.py`](util/logger.py):
 
 ```python
 # Score events
@@ -379,11 +379,11 @@ Future enhancement possibilities:
 ### Phase 1: Core Scoring (P1)
 
 - [x] Create `score_manager.py` with `ScoreManager` class
-- [x] Add scoring constants to [`constants.py`](constants.py)
+- [x] Add scoring constants to [`constants.py`](util/constants.py)
 - [x] Implement base point calculation based on asteroid radius
-- [ ] Integrate with collision detection in [`main.py`](main.py)
-- [ ] Add score logging events to [`logger.py`](logger.py)
-- [ ] Create `score_display.py` with basic HUD
+- [x] Integrate with collision detection in [`main.py`](main.py)
+- [x] Add score logging events to [`logger.py`](util/logger.py)
+- [x] Create `score_display.py` with basic HUD
 - [x] Test score accuracy for all asteroid sizes
 
 ### Phase 2: Combo System (P2)

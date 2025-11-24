@@ -15,6 +15,7 @@ class ScoreManager():
 
 	def add_score(self, asteroid_radius):
 		self.__current_score += self._calculate_base_points(asteroid_radius) * self.get_combo_multiplier()
+		self._update_combo()
 		if self.__current_score > SCORE_MAX:
 			self.__current_score = SCORE_MAX
 		return 
@@ -32,9 +33,11 @@ class ScoreManager():
 	
 	def _update_combo(self):
 		self.__combo_multiplier += 1
+		self.__combo_timer = 2.0
 
 	def _reset_combo(self):
 		self.__combo_multiplier = 1
+		self.__combo_timer = 0.0
 
 	def _calculate_base_points(self, radius):
 		if radius == ASTEROID_MAX_RADIUS:
