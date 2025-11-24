@@ -26,7 +26,7 @@ def main():
     AsteroidField.containers = updatable
     Player.containers = (updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
-
+    
     asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     score_manager = ScoreManager()
@@ -54,12 +54,19 @@ def main():
                     rock.split()
                     score_manager.add_score(rock.radius)
                     current_score = score_manager.get_current_score()
+                    combo = score_manager.get_combo_multiplier()
                     score_display.update_score(current_score)
+                    score_display.update_combo(combo)
                     log_score_added(
-                        current_score, score_manager.get_combo_multiplier()
+                        current_score, combo
                     )
 
         score_display.render_surface(screen)
+        old_combo = score_manager.get_combo_multiplier()
+        score_manager.update(dt)
+        new_combo = score_manager.get_combo_multiplier()
+        if old_combo != new_combo:
+            score_display.update_combo(new_combo)
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000  # Convert milliseconds to seconds

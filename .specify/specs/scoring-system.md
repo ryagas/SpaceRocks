@@ -388,13 +388,13 @@ Future enhancement possibilities:
 
 ### Phase 2: Combo System (P2)
 
-- [ ] Implement combo timer in `ScoreManager.update(dt)`
-- [ ] Add combo increase logic on asteroid hits
-- [ ] Add combo reset logic on timeout
-- [ ] Add combo multiplier to score calculations
-- [ ] Add combo display to HUD
-- [ ] Add combo logging events
-- [ ] Playtest combo timing and feel
+- [x] Implement combo timer in `ScoreManager.update(dt)`
+- [x] Add combo increase logic on asteroid hits
+- [x] Add combo reset logic on timeout
+- [x] Add combo multiplier to score calculations
+- [x] Add combo display to HUD
+- [x] Add combo logging events
+- [x] Playtest combo timing and feel
 
 ### Phase 3: Polish & Testing
 

@@ -18,10 +18,9 @@ class ScoreManager():
 		self._update_combo()
 		if self.__current_score > SCORE_MAX:
 			self.__current_score = SCORE_MAX
-		return 
+		return
 	
 	def update(self, dt):
-		# update combo timer each frame
 		self.__combo_timer -= dt
 		if self.__combo_timer < 0.0:
 			self.__combo_timer = 0.0
