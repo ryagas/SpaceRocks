@@ -31,6 +31,7 @@ def main():
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     score_manager = ScoreManager()
     score_display = ScoreDisplay()
+    score_display.update_high_score(score_manager.get_high_score())
     
     while True:
         log_state()
@@ -45,7 +46,12 @@ def main():
         for rock in asteroids:
             if rock.collides_with(player):
                 log_event('player_hit')
-                print('Game over!')
+                final_score = score_manager.get_current_score()
+                is_new_high_score = score_manager.check_and_save_high_score()
+                if is_new_high_score:
+                    print(f'Game over! New high score: {final_score:,}')
+                else:
+                    print(f'Game over! Final score: {final_score:,}')
                 sys.exit()
             for shot in shots:
                 if rock.collides_with(shot):

@@ -1,10 +1,12 @@
 import pygame
-from util.constants import ( 
+from util.constants import (
 	SCORE_POSITION,
 	SCORE_FONT_SIZE,
 	SCORE_COLOR,
 	COMBO_COLOR,
-	COMBO_POSITION
+	COMBO_POSITION,
+	HIGH_SCORE_COLOR,
+	HIGH_SCORE_POSITION
 	)
 
 class ScoreDisplay:
@@ -15,16 +17,22 @@ class ScoreDisplay:
 		self._position = SCORE_POSITION
 		self._combo_position = COMBO_POSITION
 		self._combo_color = COMBO_COLOR
-		self._content = { 
+		self._high_score_position = HIGH_SCORE_POSITION
+		self._high_score_color = HIGH_SCORE_COLOR
+		self._content = {
 			'SCORE' : 0,
-			'COMBO' : 1
+			'COMBO' : 1,
+			'HIGH_SCORE' : 0
 			}
 
 	def update_score(self, value):
 		self._content['SCORE'] = value
-	
+
 	def update_combo(self, value):
 		self._content['COMBO'] = value
+
+	def update_high_score(self, value):
+		self._content['HIGH_SCORE'] = value
 
 	def render_surface(self, screen):
 		font = pygame.font.Font(None, self._font_size)
@@ -35,3 +43,6 @@ class ScoreDisplay:
 			combo_text = f"COMBO: {self._content['COMBO']}"
 			combo_surface = font.render(combo_text, True, self._combo_color)
 			screen.blit(combo_surface, self._combo_position)
+		high_score_text = f"HIGH SCORE: {self._content['HIGH_SCORE']:,}"
+		high_score_surface = font.render(high_score_text, True, self._high_score_color)
+		screen.blit(high_score_surface, self._high_score_position)

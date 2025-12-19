@@ -28,3 +28,8 @@ SCORE_COLOR = (255, 255, 255)   # White color for text
 SCORE_POSITION = (10, 10)       # Top-left corner
 COMBO_COLOR = (255, 215, 0)     # Gold color for combo text
 COMBO_POSITION = (10, 50)       # Below score
+HIGH_SCORE_COLOR = (100, 200, 255)  # Light blue color for high score
+HIGH_SCORE_POSITION = (10, 90)  # Below combo
+
+# High Score Persistence
+HIGH_SCORE_FILE = "highscore.json"  # File to store high score

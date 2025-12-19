@@ -15,3 +15,5 @@ game_state.jsonl
 # spec-related stuff
 .kilocode
 
+highscore.json
+game_events.jsonl
