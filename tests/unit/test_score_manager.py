@@ -69,7 +69,7 @@ class TestAddScore(unittest.TestCase):
         self.manager.add_score(ASTEROID_MIN_RADIUS)
         self.manager.add_score(ASTEROID_MIN_RADIUS)
         self.manager.add_score(ASTEROID_MIN_RADIUS)
-        expected = SCORE_SMALL_ASTEROID * 3
+        expected = SCORE_SMALL_ASTEROID * (1 + 2 + 3)
         self.assertEqual(self.manager.get_current_score(), expected)
     
     def test_add_score_with_2x_combo_multiplier(self):
@@ -219,7 +219,7 @@ class TestGetters(unittest.TestCase):
         manager = ScoreManager()
         manager.add_score(ASTEROID_MIN_RADIUS)
         manager.add_score(ASTEROID_MIN_RADIUS * 2)
-        expected = SCORE_SMALL_ASTEROID + SCORE_MEDIUM_ASTEROID
+        expected = SCORE_SMALL_ASTEROID * 1 + SCORE_MEDIUM_ASTEROID * 2
         self.assertEqual(manager.get_current_score(), expected)
     
     def test_get_combo_multiplier_returns_one_initially(self):
@@ -239,7 +239,7 @@ class TestEdgeCases(unittest.TestCase):
         manager = ScoreManager()
         for _ in range(100):
             manager.add_score(ASTEROID_MAX_RADIUS)
-        expected = SCORE_LARGE_ASTEROID * 100
+        expected = SCORE_MAX
         self.assertEqual(manager.get_current_score(), expected)
     
     def test_high_combo_multiplier(self):
@@ -298,13 +298,13 @@ class TestStateManagement(unittest.TestCase):
         manager = ScoreManager()
         manager._ScoreManager__combo_multiplier = 3
         manager.add_score(ASTEROID_MIN_RADIUS)
-        self.assertEqual(manager.get_combo_multiplier(), 3)
+        self.assertEqual(manager.get_combo_multiplier(), 4)
     
     def test_timer_independent_of_score(self):
         manager = ScoreManager()
         manager._ScoreManager__combo_timer = 1.5
         manager.add_score(ASTEROID_MAX_RADIUS)
-        self.assertEqual(manager._ScoreManager__combo_timer, 1.5)
+        self.assertEqual(manager._ScoreManager__combo_timer, COMBO_WINDOW_SECONDS)
     
     def test_state_isolation_between_instances(self):
         manager1 = ScoreManager()
@@ -322,7 +322,11 @@ class TestScoreCalculationAccuracy(unittest.TestCase):
         manager.add_score(ASTEROID_MIN_RADIUS)
         manager.add_score(ASTEROID_MIN_RADIUS * 2)
         manager.add_score(ASTEROID_MAX_RADIUS)
-        expected = SCORE_SMALL_ASTEROID + SCORE_MEDIUM_ASTEROID + SCORE_LARGE_ASTEROID
+        expected = (
+            SCORE_SMALL_ASTEROID * 1
+            + SCORE_MEDIUM_ASTEROID * 2
+            + SCORE_LARGE_ASTEROID * 3
+        )
         self.assertEqual(manager.get_current_score(), expected)
     
     def test_score_calculation_maintains_integer_precision(self):
