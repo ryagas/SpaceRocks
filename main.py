@@ -4,7 +4,7 @@ from classes.asteroid import Asteroid
 from classes.asteroidfield import AsteroidField
 from score_display import ScoreDisplay
 from util.logger import log_event, log_score_added, log_state
-from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
 from classes.player import Player
 from classes.shot import Shot
 from classes.score_manager import ScoreManager
@@ -29,9 +29,11 @@ def main():
     
     asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    lives = PLAYER_LIVES
     score_manager = ScoreManager()
     score_display = ScoreDisplay()
     score_display.update_high_score(score_manager.get_high_score())
+    score_display.update_lives(lives)
     
     while True:
         log_state()
@@ -44,15 +46,20 @@ def main():
         for entity in drawable:
             entity.draw(screen)
         for rock in asteroids:
-            if rock.collides_with(player):
+            if player.is_vulnerable() and rock.collides_with(player):
                 log_event('player_hit')
-                final_score = score_manager.get_current_score()
-                is_new_high_score = score_manager.check_and_save_high_score()
-                if is_new_high_score:
-                    print(f'Game over! New high score: {final_score:,}')
-                else:
-                    print(f'Game over! Final score: {final_score:,}')
-                sys.exit()
+                lives -= 1
+                score_display.update_lives(lives)
+                if lives <= 0:
+                    final_score = score_manager.get_current_score()
+                    is_new_high_score = score_manager.check_and_save_high_score()
+                    if is_new_high_score:
+                        print(f'Game over! New high score: {final_score:,}')
+                    else:
+                        print(f'Game over! Final score: {final_score:,}')
+                    sys.exit()
+                player.respawn((SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+                break
             for shot in shots:
                 if rock.collides_with(shot):
                     log_event('asteroid_shot')

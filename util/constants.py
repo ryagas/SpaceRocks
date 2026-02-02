@@ -11,6 +11,8 @@ ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 SHOT_RADIUS = 5
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN_SECONDS = 0.3
+PLAYER_LIVES = 3
+PLAYER_RESPAWN_INVULN_SECONDS = 2.0
 
 # Scoring System
 SCORE_SMALL_ASTEROID = 50       # Points for smallest asteroid
@@ -30,6 +32,8 @@ COMBO_COLOR = (255, 215, 0)     # Gold color for combo text
 COMBO_POSITION = (10, 50)       # Below score
 HIGH_SCORE_COLOR = (100, 200, 255)  # Light blue color for high score
 HIGH_SCORE_POSITION = (10, 90)  # Below combo
+LIVES_COLOR = (255, 255, 255)   # White color for lives text
+LIVES_POSITION = (10, 130)      # Below high score
 
 # High Score Persistence
 HIGH_SCORE_FILE = "highscore.json"  # File to store high score
