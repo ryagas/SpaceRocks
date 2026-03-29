@@ -19,6 +19,15 @@ class Particle(pygame.sprite.Sprite):
 
     def draw(self, screen):
         fade_ratio = max(0, self.lifetime / self.max_lifetime)
-        brightness = int(40 + 215 * fade_ratio)
-        color = pygame.Color(brightness, brightness, brightness)
-        pygame.draw.circle(screen, color, self.position, self.radius)
+        if isinstance(self.color, str):
+            base_color = pygame.Color(self.color)
+        elif isinstance(self.color, pygame.Color):
+            base_color = self.color
+        else:
+            base_color = pygame.Color(*self.color)
+        faded_color = pygame.Color(
+            int(base_color.r * fade_ratio),
+            int(base_color.g * fade_ratio),
+            int(base_color.b * fade_ratio),
+        )
+        pygame.draw.circle(screen, faded_color, self.position, self.radius)

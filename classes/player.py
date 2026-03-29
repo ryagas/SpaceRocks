@@ -1,7 +1,23 @@
+import random
+
 import pygame
+
 from classes.circleshape import CircleShape
-from util.constants import LINE_WIDTH, PLAYER_RADIUS, PLAYER_RESPAWN_INVULN_SECONDS, PLAYER_SHOOT_COOLDOWN_SECONDS, PLAYER_SHOOT_SPEED, PLAYER_SPEED, PLAYER_TURN_SPEED, SHOT_RADIUS
+from classes.particle import Particle
 from classes.shot import Shot
+from util.constants import (
+	LINE_WIDTH,
+	PLAYER_ACCELERATION,
+	PLAYER_DRAG,
+	PLAYER_MAX_SPEED,
+	PLAYER_RADIUS,
+	PLAYER_RESPAWN_INVULN_SECONDS,
+	PLAYER_SHOOT_COOLDOWN_SECONDS,
+	PLAYER_SHOOT_SPEED,
+	PLAYER_THRUST_PARTICLES,
+	PLAYER_TURN_SPEED,
+	SHOT_RADIUS,
+)
 
 
 class Player(CircleShape):
@@ -40,17 +56,35 @@ class Player(CircleShape):
 		if keys[pygame.K_d]:
 			self.rotate(dt)
 		if keys[pygame.K_w]:
-			self.move(dt)
+			self.thrust(dt)
+			self.emit_thrust_particles()
 		if keys[pygame.K_s]:
-			self.move(-dt)
+			self.thrust(-dt * 0.6)
 		if keys[pygame.K_SPACE]:
 			self.shoot()
 
-	def move(self, dt):
-		unit_vector = pygame.Vector2(0, 1)
-		rotated_vector = unit_vector.rotate(self.rotation)
-		rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
-		self.position += rotated_with_speed_vector
+		self.velocity *= PLAYER_DRAG ** dt
+		self.position += self.velocity * dt
+
+	def thrust(self, dt):
+		direction = pygame.Vector2(0, 1).rotate(self.rotation)
+		self.velocity += direction * PLAYER_ACCELERATION * dt
+		if self.velocity.length() > PLAYER_MAX_SPEED:
+			self.velocity.scale_to_length(PLAYER_MAX_SPEED)
+
+	def emit_thrust_particles(self):
+		back_direction = pygame.Vector2(0, -1).rotate(self.rotation)
+		flame_colors = ["orange", "yellow", "red", (255, 200, 50), (255, 150, 30)]
+		for _ in range(PLAYER_THRUST_PARTICLES):
+			spread_direction = back_direction.rotate(random.uniform(-20, 20))
+			particle_velocity = spread_direction * random.uniform(50, 120) + self.velocity * 0.3
+			Particle(
+				position=self.position + back_direction * self.radius,
+				velocity=particle_velocity,
+				lifetime=random.uniform(0.15, 0.35),
+				radius=random.uniform(1, 2.5),
+				color=random.choice(flame_colors),
+			)
 	
 	def shoot(self):
 		if self.shot_cooldown > 0:

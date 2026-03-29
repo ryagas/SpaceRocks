@@ -4,7 +4,7 @@
 - [x] High score tracking between sessions
 - [x] Implement multiple lives and respawning
 - [x] Add an explosion effect for the asteroids
-- [ ] Add acceleration to the player movement
+- [x] Add acceleration to the player movement
 - [ ] Make the objects wrap around the screen instead of disappearing
 - [ ] Add a background image
 - [ ] Create different weapon types
