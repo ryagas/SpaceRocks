@@ -1,6 +1,7 @@
 import random
 import pygame
 from classes.circleshape import CircleShape
+from classes.explosion import create_explosion
 from util.constants import ASTEROID_MIN_RADIUS, LINE_WIDTH
 from util.logger import log_event
 
@@ -18,6 +19,7 @@ class Asteroid(CircleShape):
 
 	def split(self):
 		self.kill()
+		create_explosion(self.position, self.radius)
 		if self.radius <= ASTEROID_MIN_RADIUS:
 			return
 		log_event('asteroid_split')

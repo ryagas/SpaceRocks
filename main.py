@@ -8,6 +8,8 @@ from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
 from classes.player import Player
 from classes.shot import Shot
 from classes.score_manager import ScoreManager
+from classes.particle import Particle
+from classes.shockwave import Shockwave
 
 def main():
     print("Starting Asteroids with pygame version: ", pygame.version.ver)
@@ -26,6 +28,8 @@ def main():
     AsteroidField.containers = updatable
     Player.containers = (updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
+    Particle.containers = (updatable, drawable)
+    Shockwave.containers = (updatable, drawable)
     
     asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)

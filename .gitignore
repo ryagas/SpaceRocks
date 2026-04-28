@@ -17,3 +17,7 @@ game_state.jsonl
 
 highscore.json
 game_events.jsonl
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
