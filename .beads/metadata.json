@@ -1,3 +1,7 @@
 {
-  "database": "dolt"
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "SpaceRocks",
+  "project_id": "45383346-ddc6-4b50-a4e8-28ec1ac2f356"
 }
