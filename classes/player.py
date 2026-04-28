@@ -65,6 +65,7 @@ class Player(CircleShape):
 
 		self.velocity *= PLAYER_DRAG ** dt
 		self.position += self.velocity * dt
+		self.wrap_position()
 
 	def thrust(self, dt):
 		direction = pygame.Vector2(0, 1).rotate(self.rotation)
