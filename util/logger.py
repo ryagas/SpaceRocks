@@ -7,6 +7,7 @@ __all__ = ["log_state", "log_event", "log_score_added", "log_combo_increased", "
 
 _FPS = 60
 _MAX_SECONDS = 16
+_MAX_FRAMES = _FPS * _MAX_SECONDS
 _SPRITE_SAMPLE_LIMIT = 10  # Maximum number of sprites to log per group
 
 _frame_count = 0
@@ -18,24 +19,22 @@ _start_time = datetime.now()
 def log_state():
     global _frame_count, _state_log_initialized
 
-    # Stop logging after `_MAX_SECONDS` seconds
-    if _frame_count > _FPS * _MAX_SECONDS:
-        return
+    if _frame_count > _MAX_FRAMES:
+        return False
 
-    # Take a snapshot approx. once per second
     _frame_count += 1
     if _frame_count % _FPS != 0:
-        return
+        return True
 
     now = datetime.now()
 
     frame = inspect.currentframe()
     if frame is None:
-        return
+        return True
 
     frame_back = frame.f_back
     if frame_back is None:
-        return
+        return True
 
     local_vars = frame_back.f_locals.copy()
 
@@ -113,6 +112,7 @@ def log_state():
         f.write(json.dumps(entry) + "\n")
 
     _state_log_initialized = True
+    return True
 
 
 def log_event(event_type, **details):

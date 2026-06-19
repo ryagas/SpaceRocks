@@ -39,8 +39,10 @@ def main():
     score_display.update_high_score(score_manager.get_high_score())
     score_display.update_lives(lives)
     
+    log_active = True
     while True:
-        log_state()
+        if log_active:
+            log_active = log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
