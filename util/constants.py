@@ -39,4 +39,5 @@ LIVES_COLOR = (255, 255, 255)   # White color for lives text
 LIVES_POSITION = (10, 130)      # Below high score
 
 # High Score Persistence
-HIGH_SCORE_FILE = "highscore.json"  # File to store high score
+import pathlib  # noqa: E402 -- kept adjacent to its sole use below
+HIGH_SCORE_FILE = str(pathlib.Path(__file__).parent.parent / "highscore.json")  # Anchored to project root
