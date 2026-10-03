@@ -10,6 +10,8 @@ from classes.shot import Shot
 from classes.score_manager import ScoreManager
 from classes.particle import Particle
 from classes.shockwave import Shockwave
+from classes.shield_powerup import ShieldPowerUp
+from classes.shield_spawner import ShieldSpawner
 from score_display import ScoreDisplay
 from util.constants import (
     ASTEROID_MIN_RADIUS,
@@ -18,6 +20,10 @@ from util.constants import (
     PLAYER_SHOOT_SPEED,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
+    SHIELD_BREAK_INVULN_SECONDS,
+    SHIELD_COLOR,
+    SHIELD_DURATION_SECONDS,
+    SHIELD_POWERUP_SPAWN_SECONDS,
     SHOT_RADIUS,
 )
 
@@ -31,6 +37,7 @@ class TestGameLoop:
         self.drawable = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
         self.shots = pygame.sprite.Group()
+        self.shield_powerups = pygame.sprite.Group()
 
         Asteroid.containers = (self.asteroids, self.updatable, self.drawable)
         AsteroidField.containers = self.updatable
@@ -38,8 +45,11 @@ class TestGameLoop:
         Shot.containers = (self.shots, self.updatable, self.drawable)
         Particle.containers = (self.updatable, self.drawable)
         Shockwave.containers = (self.updatable, self.drawable)
+        ShieldPowerUp.containers = (self.shield_powerups, self.updatable, self.drawable)
+        ShieldSpawner.containers = self.updatable
 
         self.asteroid_field = AsteroidField()
+        self.shield_spawner = ShieldSpawner()
         self.player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.score_manager = ScoreManager()
         self.score_display = ScoreDisplay()
@@ -47,7 +57,7 @@ class TestGameLoop:
         self.score_display.update_lives(PLAYER_LIVES)
 
     def teardown_method(self):
-        for group in (self.updatable, self.drawable, self.asteroids, self.shots):
+        for group in (self.updatable, self.drawable, self.asteroids, self.shots, self.shield_powerups):
             group.empty()
         pygame.quit()
 
@@ -126,3 +136,83 @@ class TestGameLoop:
             elapsed += dt
 
         assert self.score_manager.get_combo_multiplier() == 1
+
+    def tick(self, seconds):
+        dt = 1 / 60
+        for _ in range(round(seconds / dt)):
+            for entity in self.updatable:
+                entity.update(dt)
+
+    def resolve_shield_pickups(self):
+        # Mirror main.py's shield pickup resolution.
+        for shield_powerup in self.shield_powerups:
+            if shield_powerup.collides_with(self.player):
+                shield_powerup.pick_up(self.player)
+
+    def resolve_asteroid_hit(self, asteroid, lives):
+        # Mirror main.py's player/asteroid gate: an active shield absorbs the hit instead of a life.
+        if self.player.is_vulnerable() and asteroid.collides_with(self.player):
+            if not self.player.absorb_hit():
+                lives -= 1
+        return lives
+
+    def test_shield_spawner_puts_visible_powerup_in_play(self):
+        self.tick(SHIELD_POWERUP_SPAWN_SECONDS + 0.1)
+
+        assert len(self.shield_powerups) == 1
+        powerup = next(iter(self.shield_powerups))
+        assert powerup in self.updatable
+        assert powerup in self.drawable
+
+        self.screen.fill("black")
+        for entity in self.drawable:
+            entity.draw(self.screen)
+        shield_pixels = pygame.mask.from_threshold(self.screen, SHIELD_COLOR, (1, 1, 1, 255)).count()
+        assert shield_pixels > 0
+
+    def test_picked_up_shield_absorbs_asteroid_hit(self):
+        lives = PLAYER_LIVES
+        ShieldPowerUp(self.player.position.x, self.player.position.y)
+        self.tick(1 / 60)
+        self.resolve_shield_pickups()
+
+        assert self.player.has_shield()
+        assert len(self.shield_powerups) == 0
+
+        asteroid = Asteroid(self.player.position.x, self.player.position.y, ASTEROID_MIN_RADIUS)
+        asteroid.velocity = pygame.Vector2(0, 0)
+        self.tick(1 / 60)
+        lives = self.resolve_asteroid_hit(asteroid, lives)
+
+        assert lives == PLAYER_LIVES
+        assert not self.player.has_shield()
+        assert not self.player.is_vulnerable()
+
+    def test_hit_after_shield_breaks_costs_a_life(self):
+        lives = PLAYER_LIVES
+        self.player.activate_shield()
+        asteroid = Asteroid(self.player.position.x, self.player.position.y, ASTEROID_MIN_RADIUS)
+        asteroid.velocity = pygame.Vector2(0, 0)
+
+        lives = self.resolve_asteroid_hit(asteroid, lives)
+        assert lives == PLAYER_LIVES
+
+        self.tick(SHIELD_BREAK_INVULN_SECONDS + 0.1)
+        assert asteroid.collides_with(self.player)
+        lives = self.resolve_asteroid_hit(asteroid, lives)
+        assert lives == PLAYER_LIVES - 1
+
+    def test_shield_expires_and_hits_cost_lives_again(self):
+        lives = PLAYER_LIVES
+        ShieldPowerUp(self.player.position.x, self.player.position.y)
+        self.tick(1 / 60)
+        self.resolve_shield_pickups()
+        assert self.player.has_shield()
+
+        self.tick(SHIELD_DURATION_SECONDS + 0.1)
+        assert not self.player.has_shield()
+
+        asteroid = Asteroid(self.player.position.x, self.player.position.y, ASTEROID_MIN_RADIUS)
+        asteroid.velocity = pygame.Vector2(0, 0)
+        lives = self.resolve_asteroid_hit(asteroid, lives)
+        assert lives == PLAYER_LIVES - 1

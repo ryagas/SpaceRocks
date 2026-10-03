@@ -16,6 +16,11 @@ from util.constants import (
 	PLAYER_SHOOT_SPEED,
 	PLAYER_THRUST_PARTICLES,
 	PLAYER_TURN_SPEED,
+	SHIELD_BREAK_INVULN_SECONDS,
+	SHIELD_COLOR,
+	SHIELD_DURATION_SECONDS,
+	SHIELD_RADIUS_SCALE,
+	SHIELD_WARNING_SECONDS,
 	SHOT_RADIUS,
 )
 
@@ -26,6 +31,7 @@ class Player(CircleShape):
 		self.rotation = 0
 		self.shot_cooldown = 0
 		self.invulnerable_timer = 0
+		self.shield_timer = 0
 
 	# in the Player class
 	def triangle(self):
@@ -37,11 +43,20 @@ class Player(CircleShape):
 		return [a, b, c]
 	
 	def draw(self, screen):
+		if self.has_shield():
+			self.draw_shield(screen)
 		if self.invulnerable_timer > 0:
 			blink_on = int(self.invulnerable_timer * 10) % 2 == 0
 			if not blink_on:
 				return
 		pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+
+	def draw_shield(self, screen):
+		if self.shield_timer < SHIELD_WARNING_SECONDS:
+			blink_on = int(self.shield_timer * 10) % 2 == 0
+			if not blink_on:
+				return
+		pygame.draw.circle(screen, SHIELD_COLOR, self.position, self.radius * SHIELD_RADIUS_SCALE, LINE_WIDTH)
 
 	def rotate(self, dt):
 		self.rotation += PLAYER_TURN_SPEED * dt
@@ -50,6 +65,7 @@ class Player(CircleShape):
 		keys = pygame.key.get_pressed()
 		self.shot_cooldown -= dt
 		self.invulnerable_timer = max(0, self.invulnerable_timer - dt)
+		self.shield_timer = max(0, self.shield_timer - dt)
 
 		if keys[pygame.K_a]:
 			self.rotate(-dt)
@@ -97,6 +113,19 @@ class Player(CircleShape):
 
 	def is_vulnerable(self):
 		return self.invulnerable_timer <= 0
+
+	def activate_shield(self):
+		self.shield_timer = SHIELD_DURATION_SECONDS
+
+	def has_shield(self):
+		return self.shield_timer > 0
+
+	def absorb_hit(self):
+		if not self.has_shield():
+			return False
+		self.shield_timer = 0
+		self.invulnerable_timer = SHIELD_BREAK_INVULN_SECONDS
+		return True
 
 	def respawn(self, position):
 		self.position = pygame.Vector2(position)

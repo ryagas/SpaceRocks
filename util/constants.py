@@ -41,3 +41,13 @@ LIVES_POSITION = (10, 130)      # Below high score
 # High Score Persistence
 import pathlib  # noqa: E402 -- kept adjacent to its sole use below
 HIGH_SCORE_FILE = str(pathlib.Path(__file__).parent.parent / "highscore.json")  # Anchored to project root
+
+# Shield Power-up
+SHIELD_POWERUP_RADIUS = 12              # Size of the collectible pickup
+SHIELD_POWERUP_SPAWN_SECONDS = 20.0     # Time between pickup spawns
+SHIELD_POWERUP_LIFETIME_SECONDS = 8.0   # Uncollected pickup disappears after this
+SHIELD_DURATION_SECONDS = 10.0          # Active shield expires after this
+SHIELD_WARNING_SECONDS = 2.0            # Shield and pickup blink when this close to running out
+SHIELD_BREAK_INVULN_SECONDS = 2.0       # Grace period after the shield absorbs a hit
+SHIELD_RADIUS_SCALE = 1.5               # Shield bubble radius relative to the ship
+SHIELD_COLOR = (0, 200, 255)            # Cyan color for the shield and its pickup

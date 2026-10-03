@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 from unittest.mock import patch, MagicMock
 import pygame
 from classes.player import Player
@@ -12,6 +13,9 @@ from util.constants import (
     PLAYER_TURN_SPEED,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    SHIELD_BREAK_INVULN_SECONDS,
+    SHIELD_COLOR,
+    SHIELD_DURATION_SECONDS,
 )
 
 
@@ -160,6 +164,104 @@ class TestPlayerScreenWrapping(unittest.TestCase):
         p = Player(400, SCREEN_HEIGHT + PLAYER_RADIUS + 1)
         p.wrap_position()
         self.assertAlmostEqual(p.position.y, -PLAYER_RADIUS)
+
+
+class TestPlayerShield(unittest.TestCase):
+
+    def setUp(self):
+        self.player = Player(400, 300)
+
+    def test_initially_no_shield(self):
+        self.assertFalse(self.player.has_shield())
+
+    def test_activate_shield_turns_shield_on(self):
+        self.player.activate_shield()
+        self.assertTrue(self.player.has_shield())
+
+    def test_activate_shield_sets_full_duration(self):
+        self.player.activate_shield()
+        self.assertAlmostEqual(self.player.shield_timer, SHIELD_DURATION_SECONDS)
+
+    def test_activate_shield_refreshes_partly_used_shield(self):
+        self.player.shield_timer = 1.0
+        self.player.activate_shield()
+        self.assertAlmostEqual(self.player.shield_timer, SHIELD_DURATION_SECONDS)
+
+    def test_absorb_hit_with_shield_returns_true(self):
+        self.player.activate_shield()
+        self.assertTrue(self.player.absorb_hit())
+
+    def test_absorb_hit_consumes_shield(self):
+        self.player.activate_shield()
+        self.player.absorb_hit()
+        self.assertFalse(self.player.has_shield())
+
+    def test_absorb_hit_grants_grace_invulnerability(self):
+        self.player.activate_shield()
+        self.player.absorb_hit()
+        self.assertFalse(self.player.is_vulnerable())
+        self.assertAlmostEqual(self.player.invulnerable_timer, SHIELD_BREAK_INVULN_SECONDS)
+
+    def test_shield_absorbs_only_one_hit(self):
+        self.player.activate_shield()
+        self.player.absorb_hit()
+        self.assertFalse(self.player.absorb_hit())
+
+    def test_absorb_hit_without_shield_returns_false(self):
+        self.assertFalse(self.player.absorb_hit())
+
+    def test_absorb_hit_without_shield_leaves_player_vulnerable(self):
+        self.player.absorb_hit()
+        self.assertTrue(self.player.is_vulnerable())
+
+
+@patch("pygame.key.get_pressed", return_value=defaultdict(bool))
+class TestPlayerShieldExpiry(unittest.TestCase):
+
+    def setUp(self):
+        self.player = Player(400, 300)
+        self.player.activate_shield()
+
+    def test_shield_still_active_before_duration_elapses(self, _keys):
+        self.player.update(SHIELD_DURATION_SECONDS - 0.1)
+        self.assertTrue(self.player.has_shield())
+
+    def test_shield_expires_when_duration_elapses(self, _keys):
+        self.player.update(SHIELD_DURATION_SECONDS)
+        self.assertFalse(self.player.has_shield())
+
+    def test_shield_expires_over_many_frames(self, _keys):
+        for _ in range(round((SHIELD_DURATION_SECONDS + 0.1) * 60)):
+            self.player.update(1 / 60)
+        self.assertFalse(self.player.has_shield())
+
+    def test_shield_timer_does_not_go_negative(self, _keys):
+        self.player.update(SHIELD_DURATION_SECONDS + 5)
+        self.assertEqual(self.player.shield_timer, 0)
+
+    def test_expired_shield_does_not_absorb_hit(self, _keys):
+        self.player.update(SHIELD_DURATION_SECONDS)
+        self.assertFalse(self.player.absorb_hit())
+        self.assertTrue(self.player.is_vulnerable())
+
+
+class TestPlayerShieldDraw(unittest.TestCase):
+
+    def setUp(self):
+        self.player = Player(100, 100)
+        self.screen = pygame.Surface((200, 200))
+
+    def count_shield_pixels(self):
+        return pygame.mask.from_threshold(self.screen, SHIELD_COLOR, (1, 1, 1, 255)).count()
+
+    def test_draw_shows_shield_bubble_when_active(self):
+        self.player.activate_shield()
+        self.player.draw(self.screen)
+        self.assertGreater(self.count_shield_pixels(), 0)
+
+    def test_draw_shows_no_shield_bubble_without_shield(self):
+        self.player.draw(self.screen)
+        self.assertEqual(self.count_shield_pixels(), 0)
 
 
 if __name__ == "__main__":
