@@ -1,6 +1,6 @@
 import unittest
 from collections import defaultdict
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pygame
 from classes.player import Player
 from classes.shot import Shot
