@@ -1,4 +1,3 @@
-import sys
 import pygame
 from classes.asteroid import Asteroid
 from classes.asteroidfield import AsteroidField
@@ -39,10 +38,13 @@ def main():
     score_display.update_high_score(score_manager.get_high_score())
     score_display.update_lives(lives)
     
+    log_active = True
     while True:
-        log_state()
+        if log_active:
+            log_active = log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                score_manager.check_and_save_high_score()
                 return
         screen.fill("black")
         for entity in updatable:
@@ -61,7 +63,7 @@ def main():
                         print(f'Game over! New high score: {final_score:,}')
                     else:
                         print(f'Game over! Final score: {final_score:,}')
-                    sys.exit()
+                    return
                 player.respawn((SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
                 break
             for shot in shots:
@@ -77,6 +79,7 @@ def main():
                     log_score_added(
                         current_score, combo
                     )
+                    break
 
         score_display.render_surface(screen)
         old_combo = score_manager.get_combo_multiplier()
