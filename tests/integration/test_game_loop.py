@@ -2,7 +2,11 @@ import os
 os.environ.setdefault('SDL_VIDEODRIVER', 'dummy')
 os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')
 
+from collections import defaultdict
+from unittest.mock import patch
+
 import pygame
+import pytest
 from classes.asteroid import Asteroid
 from classes.asteroidfield import AsteroidField
 from classes.player import Player
@@ -10,6 +14,8 @@ from classes.shot import Shot
 from classes.score_manager import ScoreManager
 from classes.particle import Particle
 from classes.shockwave import Shockwave
+from classes.speed_powerup import SpeedPowerUp
+from classes.speed_powerup_spawner import SpeedPowerUpSpawner
 from score_display import ScoreDisplay
 from util.constants import (
     ASTEROID_MIN_RADIUS,
@@ -19,6 +25,9 @@ from util.constants import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     SHOT_RADIUS,
+    SPEED_POWERUP_DURATION_SECONDS,
+    SPEED_POWERUP_MULTIPLIER,
+    SPEED_POWERUP_SPAWN_INTERVAL_SECONDS,
 )
 
 
@@ -31,6 +40,7 @@ class TestGameLoop:
         self.drawable = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
         self.shots = pygame.sprite.Group()
+        self.speed_powerups = pygame.sprite.Group()
 
         Asteroid.containers = (self.asteroids, self.updatable, self.drawable)
         AsteroidField.containers = self.updatable
@@ -38,8 +48,11 @@ class TestGameLoop:
         Shot.containers = (self.shots, self.updatable, self.drawable)
         Particle.containers = (self.updatable, self.drawable)
         Shockwave.containers = (self.updatable, self.drawable)
+        SpeedPowerUp.containers = (self.speed_powerups, self.updatable, self.drawable)
+        SpeedPowerUpSpawner.containers = self.updatable
 
         self.asteroid_field = AsteroidField()
+        self.speed_powerup_spawner = SpeedPowerUpSpawner()
         self.player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.score_manager = ScoreManager()
         self.score_display = ScoreDisplay()
@@ -47,7 +60,7 @@ class TestGameLoop:
         self.score_display.update_lives(PLAYER_LIVES)
 
     def teardown_method(self):
-        for group in (self.updatable, self.drawable, self.asteroids, self.shots):
+        for group in (self.updatable, self.drawable, self.asteroids, self.shots, self.speed_powerups):
             group.empty()
         pygame.quit()
 
@@ -126,3 +139,56 @@ class TestGameLoop:
             elapsed += dt
 
         assert self.score_manager.get_combo_multiplier() == 1
+
+    def test_speed_powerup_spawns_during_play(self):
+        dt = 1 / 60
+        # One tick past the interval so float accumulation can't land just short of it.
+        for _ in range(round(SPEED_POWERUP_SPAWN_INTERVAL_SECONDS / dt) + 1):
+            for entity in self.updatable:
+                entity.update(dt)
+
+        assert len(self.speed_powerups) == 1
+
+    def test_collecting_speed_powerup_boosts_player_until_expiry(self):
+        powerup = SpeedPowerUp(self.player.position.x, self.player.position.y)
+        dt = 1 / 60
+
+        def tick():
+            for entity in self.updatable:
+                entity.update(dt)
+            # Mirror main.py's speed power-up pickup resolution.
+            for speed_powerup in self.speed_powerups:
+                if speed_powerup.collides_with(self.player):
+                    speed_powerup.collect(self.player)
+
+        tick()
+        assert not powerup.alive()
+        assert self.player.is_speed_boosted()
+
+        boost_ticks = round(SPEED_POWERUP_DURATION_SECONDS / dt)
+        for _ in range(boost_ticks - 1):
+            tick()
+        assert self.player.is_speed_boosted()
+
+        for _ in range(2):
+            tick()
+        assert not self.player.is_speed_boosted()
+
+    def test_speed_boost_makes_thrusting_ship_faster(self):
+        dt = 1 / 60
+        thrust_held = defaultdict(bool, {pygame.K_w: True})
+
+        def speed_after_one_second_of_thrust():
+            self.player.velocity = pygame.Vector2(0, 0)
+            with patch('pygame.key.get_pressed', return_value=thrust_held):
+                for _ in range(60):
+                    for entity in self.updatable:
+                        entity.update(dt)
+            return self.player.velocity.length()
+
+        normal_speed = speed_after_one_second_of_thrust()
+        self.player.apply_speed_boost()
+        boosted_speed = speed_after_one_second_of_thrust()
+
+        assert normal_speed > 0
+        assert boosted_speed == pytest.approx(normal_speed * SPEED_POWERUP_MULTIPLIER)

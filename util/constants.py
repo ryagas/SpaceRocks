@@ -17,6 +17,15 @@ PLAYER_SHOOT_COOLDOWN_SECONDS = 0.3
 PLAYER_LIVES = 3
 PLAYER_RESPAWN_INVULN_SECONDS = 2.0
 
+# Speed Power-Up
+SPEED_POWERUP_RADIUS = 15                    # Pickup collision radius
+SPEED_POWERUP_COLOR = (0, 255, 255)          # Cyan; also tints the ship while boosted
+SPEED_POWERUP_SPAWN_INTERVAL_SECONDS = 15.0  # Time between power-up spawns
+SPEED_POWERUP_SPAWN_MARGIN = 100             # Keeps spawns this far from the screen edges
+SPEED_POWERUP_LIFETIME_SECONDS = 8.0         # Uncollected power-up disappears after this
+SPEED_POWERUP_DURATION_SECONDS = 5.0         # How long the boost lasts once collected
+SPEED_POWERUP_MULTIPLIER = 2.0               # Boosted thrust and top speed factor
+
 # Scoring System
 SCORE_SMALL_ASTEROID = 50       # Points for smallest asteroid
 SCORE_MEDIUM_ASTEROID = 150     # Points for medium asteroid

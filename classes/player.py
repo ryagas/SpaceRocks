@@ -17,6 +17,9 @@ from util.constants import (
 	PLAYER_THRUST_PARTICLES,
 	PLAYER_TURN_SPEED,
 	SHOT_RADIUS,
+	SPEED_POWERUP_COLOR,
+	SPEED_POWERUP_DURATION_SECONDS,
+	SPEED_POWERUP_MULTIPLIER,
 )
 
 
@@ -26,6 +29,7 @@ class Player(CircleShape):
 		self.rotation = 0
 		self.shot_cooldown = 0
 		self.invulnerable_timer = 0
+		self.speed_boost_timer = 0
 
 	# in the Player class
 	def triangle(self):
@@ -41,7 +45,8 @@ class Player(CircleShape):
 			blink_on = int(self.invulnerable_timer * 10) % 2 == 0
 			if not blink_on:
 				return
-		pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+		color = SPEED_POWERUP_COLOR if self.is_speed_boosted() else "white"
+		pygame.draw.polygon(screen, color, self.triangle(), LINE_WIDTH)
 
 	def rotate(self, dt):
 		self.rotation += PLAYER_TURN_SPEED * dt
@@ -50,6 +55,7 @@ class Player(CircleShape):
 		keys = pygame.key.get_pressed()
 		self.shot_cooldown -= dt
 		self.invulnerable_timer = max(0, self.invulnerable_timer - dt)
+		self.speed_boost_timer = max(0, self.speed_boost_timer - dt)
 
 		if keys[pygame.K_a]:
 			self.rotate(-dt)
@@ -68,10 +74,12 @@ class Player(CircleShape):
 		self.wrap_position()
 
 	def thrust(self, dt):
+		speed_multiplier = SPEED_POWERUP_MULTIPLIER if self.is_speed_boosted() else 1
 		direction = pygame.Vector2(0, 1).rotate(self.rotation)
-		self.velocity += direction * PLAYER_ACCELERATION * dt
-		if self.velocity.length() > PLAYER_MAX_SPEED:
-			self.velocity.scale_to_length(PLAYER_MAX_SPEED)
+		self.velocity += direction * PLAYER_ACCELERATION * speed_multiplier * dt
+		max_speed = PLAYER_MAX_SPEED * speed_multiplier
+		if self.velocity.length() > max_speed:
+			self.velocity.scale_to_length(max_speed)
 
 	def emit_thrust_particles(self):
 		back_direction = pygame.Vector2(0, -1).rotate(self.rotation)
@@ -98,8 +106,15 @@ class Player(CircleShape):
 	def is_vulnerable(self):
 		return self.invulnerable_timer <= 0
 
+	def apply_speed_boost(self):
+		self.speed_boost_timer = SPEED_POWERUP_DURATION_SECONDS
+
+	def is_speed_boosted(self):
+		return self.speed_boost_timer > 0
+
 	def respawn(self, position):
 		self.position = pygame.Vector2(position)
 		self.velocity = pygame.Vector2(0, 0)
 		self.rotation = 0
 		self.invulnerable_timer = PLAYER_RESPAWN_INVULN_SECONDS
+		self.speed_boost_timer = 0

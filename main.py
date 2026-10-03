@@ -9,6 +9,8 @@ from classes.shot import Shot
 from classes.score_manager import ScoreManager
 from classes.particle import Particle
 from classes.shockwave import Shockwave
+from classes.speed_powerup import SpeedPowerUp
+from classes.speed_powerup_spawner import SpeedPowerUpSpawner
 
 def main():
     print("Starting Asteroids with pygame version: ", pygame.version.ver)
@@ -22,6 +24,7 @@ def main():
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    speed_powerups = pygame.sprite.Group()
 
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = updatable
@@ -29,8 +32,11 @@ def main():
     Shot.containers = (shots, updatable, drawable)
     Particle.containers = (updatable, drawable)
     Shockwave.containers = (updatable, drawable)
+    SpeedPowerUp.containers = (speed_powerups, updatable, drawable)
+    SpeedPowerUpSpawner.containers = updatable
     
     asteroid_field = AsteroidField()
+    SpeedPowerUpSpawner()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     lives = PLAYER_LIVES
     score_manager = ScoreManager()
@@ -51,6 +57,10 @@ def main():
             entity.update(dt)
         for entity in drawable:
             entity.draw(screen)
+        for powerup in speed_powerups:
+            if powerup.collides_with(player):
+                log_event('speed_powerup_collected')
+                powerup.collect(player)
         for rock in asteroids:
             if player.is_vulnerable() and rock.collides_with(player):
                 log_event('player_hit')

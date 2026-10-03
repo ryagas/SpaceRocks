@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 from unittest.mock import patch, MagicMock
 import pygame
 from classes.player import Player
@@ -12,6 +13,9 @@ from util.constants import (
     PLAYER_TURN_SPEED,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    SPEED_POWERUP_COLOR,
+    SPEED_POWERUP_DURATION_SECONDS,
+    SPEED_POWERUP_MULTIPLIER,
 )
 
 
@@ -160,6 +164,72 @@ class TestPlayerScreenWrapping(unittest.TestCase):
         p = Player(400, SCREEN_HEIGHT + PLAYER_RADIUS + 1)
         p.wrap_position()
         self.assertAlmostEqual(p.position.y, -PLAYER_RADIUS)
+
+
+class TestPlayerSpeedBoost(unittest.TestCase):
+
+    def setUp(self):
+        self.player = Player(400, 300)
+
+    def update_without_input(self, dt):
+        with patch('pygame.key.get_pressed', return_value=defaultdict(bool)):
+            self.player.update(dt)
+
+    def test_initially_not_boosted(self):
+        self.assertFalse(self.player.is_speed_boosted())
+
+    def test_apply_speed_boost_starts_full_duration(self):
+        self.player.apply_speed_boost()
+        self.assertTrue(self.player.is_speed_boosted())
+        self.assertAlmostEqual(self.player.speed_boost_timer, SPEED_POWERUP_DURATION_SECONDS)
+
+    def test_boosted_thrust_multiplies_acceleration(self):
+        self.player.apply_speed_boost()
+        self.player.thrust(1.0)
+        expected = PLAYER_ACCELERATION * SPEED_POWERUP_MULTIPLIER * 1.0
+        self.assertAlmostEqual(self.player.velocity.length(), expected, places=4)
+
+    def test_boosted_top_speed_multiplies_max_speed(self):
+        self.player.apply_speed_boost()
+        for _ in range(200):
+            self.player.thrust(0.1)
+        expected = PLAYER_MAX_SPEED * SPEED_POWERUP_MULTIPLIER
+        self.assertAlmostEqual(self.player.velocity.length(), expected, places=4)
+
+    @patch('classes.player.pygame.draw.polygon')
+    def test_boosted_ship_drawn_in_powerup_color(self, mock_polygon):
+        self.player.apply_speed_boost()
+        self.player.draw(None)
+        self.assertEqual(mock_polygon.call_args.args[1], SPEED_POWERUP_COLOR)
+
+    def test_boost_still_active_before_duration_ends(self):
+        self.player.apply_speed_boost()
+        self.update_without_input(SPEED_POWERUP_DURATION_SECONDS - 0.1)
+        self.assertTrue(self.player.is_speed_boosted())
+
+    def test_boost_expires_after_duration(self):
+        self.player.apply_speed_boost()
+        self.update_without_input(SPEED_POWERUP_DURATION_SECONDS)
+        self.assertFalse(self.player.is_speed_boosted())
+        self.assertEqual(self.player.speed_boost_timer, 0)
+
+    def test_thrust_back_to_normal_after_expiry(self):
+        self.player.apply_speed_boost()
+        self.update_without_input(SPEED_POWERUP_DURATION_SECONDS)
+        self.player.velocity = pygame.Vector2(0, 0)
+        self.player.thrust(1.0)
+        self.assertAlmostEqual(self.player.velocity.length(), PLAYER_ACCELERATION, places=4)
+
+    def test_new_pickup_refreshes_remaining_time(self):
+        self.player.apply_speed_boost()
+        self.player.speed_boost_timer = 1.0
+        self.player.apply_speed_boost()
+        self.assertAlmostEqual(self.player.speed_boost_timer, SPEED_POWERUP_DURATION_SECONDS)
+
+    def test_respawn_clears_speed_boost(self):
+        self.player.apply_speed_boost()
+        self.player.respawn((400, 300))
+        self.assertFalse(self.player.is_speed_boosted())
 
 
 if __name__ == "__main__":
