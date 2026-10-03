@@ -351,5 +351,18 @@ class TestScoreCalculationAccuracy(unittest.TestCase):
         self.assertEqual(score_after_second, expected_second)
 
 
+def test_high_score_persists_across_instances(tmp_path, monkeypatch):
+    """High score saved by one ScoreManager is loaded by a fresh instance."""
+    high_score_file = tmp_path / "highscore.json"
+    monkeypatch.setattr("classes.score_manager.HIGH_SCORE_FILE", str(high_score_file))
+
+    first = ScoreManager()
+    first._ScoreManager__current_score = 12345
+    first.check_and_save_high_score()
+
+    second = ScoreManager()
+    assert second.get_high_score() == 12345
+
+
 if __name__ == '__main__':
     unittest.main()
