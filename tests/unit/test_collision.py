@@ -21,24 +21,24 @@ class TestCollidesWithOverlap(unittest.TestCase):
         b = CircleShape(50, 0, 20)
         self.assertFalse(a.collides_with(b))
 
-    def test_distance_exactly_equals_radius_returns_false(self):
-        # collides_with uses strict < so touching boundary is False
+    def test_distance_exactly_equals_sum_of_radii_returns_false(self):
+        # strict < means touching boundary (distance == sum of radii) is not a collision
         a = CircleShape(0, 0, 20)
-        b = CircleShape(20, 0, 20)
+        b = CircleShape(40, 0, 20)
         self.assertFalse(a.collides_with(b))
 
-    def test_distance_just_inside_radius_returns_true(self):
+    def test_distance_just_inside_sum_of_radii_returns_true(self):
         a = CircleShape(0, 0, 20)
-        b = CircleShape(19, 0, 20)
+        b = CircleShape(39, 0, 20)
         self.assertTrue(a.collides_with(b))
 
-    def test_asymmetry_only_self_radius_matters(self):
-        # collides_with checks distance_to < self.radius only — other.radius is ignored.
-        # So a.collides_with(b) can differ from b.collides_with(a) when radii differ.
+    def test_both_radii_contribute_symmetrically(self):
+        # Both radii are summed, so a.collides_with(b) == b.collides_with(a).
+        # distance=10, radii=5+50=55 → collision in both directions.
         small = CircleShape(0, 0, 5)
         big = CircleShape(10, 0, 50)
-        self.assertFalse(small.collides_with(big))  # distance 10 >= small.radius 5
-        self.assertTrue(big.collides_with(small))   # distance 10 < big.radius 50
+        self.assertTrue(small.collides_with(big))
+        self.assertTrue(big.collides_with(small))
 
 
 class TestCollidesWithDiagonal(unittest.TestCase):
