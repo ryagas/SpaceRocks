@@ -79,6 +79,7 @@ def main():
                     log_score_added(
                         current_score, combo
                     )
+                    break
 
         score_display.render_surface(screen)
         old_combo = score_manager.get_combo_multiplier()
