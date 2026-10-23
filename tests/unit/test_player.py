@@ -74,6 +74,40 @@ class TestPlayerThrust(unittest.TestCase):
         self.assertLess(self.player.velocity.y, 0)
 
 
+class TestPlayerDrag(unittest.TestCase):
+
+    def setUp(self):
+        self.player = Player(400, 300)
+
+    def update_with_keys(self, dt, *pressed):
+        keys = defaultdict(bool, {key: True for key in pressed})
+        with patch('pygame.key.get_pressed', return_value=keys), \
+                patch.object(self.player, 'emit_thrust_particles'):
+            self.player.update(dt)
+
+    def test_holding_thrust_reaches_max_speed(self):
+        seconds = PLAYER_MAX_SPEED / PLAYER_ACCELERATION + 1
+        for _ in range(int(seconds * 60)):
+            self.update_with_keys(1 / 60, pygame.K_w)
+        self.assertAlmostEqual(self.player.velocity.length(), PLAYER_MAX_SPEED, places=4)
+
+    def test_thrust_frame_has_no_drag(self):
+        self.player.velocity = pygame.Vector2(0, 100)
+        self.update_with_keys(1 / 60, pygame.K_w)
+        self.assertGreater(self.player.velocity.length(), 100)
+
+    def test_reverse_thrust_frame_has_no_drag(self):
+        self.player.rotation = 0
+        self.player.velocity = pygame.Vector2(0, -100)
+        self.update_with_keys(1 / 60, pygame.K_s)
+        self.assertGreater(self.player.velocity.length(), 100)
+
+    def test_coasting_slows_ship(self):
+        self.player.velocity = pygame.Vector2(0, 100)
+        self.update_with_keys(1 / 60)
+        self.assertLess(self.player.velocity.length(), 100)
+
+
 class TestPlayerShootCooldown(unittest.TestCase):
 
     def setUp(self):

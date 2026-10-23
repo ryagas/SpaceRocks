@@ -85,7 +85,9 @@ class Player(CircleShape):
 		if keys[pygame.K_SPACE]:
 			self.shoot()
 
-		self.velocity *= PLAYER_DRAG ** dt
+		# Drag only slows a coasting ship; while thrusting, PLAYER_MAX_SPEED is the limit
+		if not (keys[pygame.K_w] or keys[pygame.K_s]):
+			self.velocity *= PLAYER_DRAG ** dt
 		self.position += self.velocity * dt
 		self.wrap_position()
 
