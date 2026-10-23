@@ -2,7 +2,13 @@ import unittest
 from unittest.mock import patch
 import pygame
 from classes.asteroid import Asteroid
-from util.constants import ASTEROID_MIN_RADIUS, SCREEN_WIDTH, SCREEN_HEIGHT
+from util.constants import (
+    ASTEROID_LUMPINESS,
+    ASTEROID_MIN_RADIUS,
+    ASTEROID_VERTICES,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+)
 
 
 class TestAsteroidInit(unittest.TestCase):
@@ -18,6 +24,46 @@ class TestAsteroidInit(unittest.TestCase):
     def test_velocity_zero_on_init(self):
         a = Asteroid(0, 0, ASTEROID_MIN_RADIUS)
         self.assertEqual(a.velocity, pygame.Vector2(0, 0))
+
+
+class TestAsteroidShape(unittest.TestCase):
+
+    def test_outline_has_configured_vertex_count(self):
+        a = Asteroid(100, 100, ASTEROID_MIN_RADIUS * 2)
+        self.assertEqual(len(a.outline()), ASTEROID_VERTICES)
+
+    def test_outline_stays_within_lumpiness_band(self):
+        radius = ASTEROID_MIN_RADIUS * 3
+        a = Asteroid(100, 100, radius)
+        for point in a.outline():
+            distance = a.position.distance_to(point)
+            self.assertGreaterEqual(distance, radius * (1 - ASTEROID_LUMPINESS) - 1e-6)
+            self.assertLessEqual(distance, radius + 1e-6)
+
+    def test_outline_follows_position(self):
+        a = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
+        before = a.outline()
+        a.position += pygame.Vector2(30, -10)
+        after = a.outline()
+        for p0, p1 in zip(before, after):
+            self.assertAlmostEqual(p1.x - p0.x, 30)
+            self.assertAlmostEqual(p1.y - p0.y, -10)
+
+    def test_shape_is_fixed_between_frames(self):
+        a = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
+        self.assertEqual(a.outline(), a.outline())
+
+    @patch('classes.asteroid.random.uniform', side_effect=[1.0, 0.7] * ASTEROID_VERTICES)
+    def test_shape_is_irregular(self, mock_rand):
+        a = Asteroid(0, 0, ASTEROID_MIN_RADIUS * 2)
+        distances = {round(a.position.distance_to(p), 4) for p in a.outline()}
+        self.assertGreater(len(distances), 1)
+
+    @patch('classes.asteroid.pygame.draw.polygon')
+    def test_draw_uses_outline_polygon(self, mock_polygon):
+        a = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
+        a.draw(None)
+        self.assertEqual(mock_polygon.call_args.args[2], a.outline())
 
 
 class TestAsteroidMovement(unittest.TestCase):

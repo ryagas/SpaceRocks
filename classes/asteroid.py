@@ -2,17 +2,25 @@ import random
 import pygame
 from classes.circleshape import CircleShape
 from classes.explosion import create_explosion
-from util.constants import ASTEROID_MIN_RADIUS, LINE_WIDTH
+from util.constants import ASTEROID_LUMPINESS, ASTEROID_MIN_RADIUS, ASTEROID_VERTICES, LINE_WIDTH
 from util.logger import log_event
 
 
 class Asteroid(CircleShape):
 	def __init__(self, x, y, radius):
 		super().__init__(x, y, radius)
+		# Outline stays inside the collision circle so screen wrapping never clips it
+		self.vertex_scales = [random.uniform(1 - ASTEROID_LUMPINESS, 1) for _ in range(ASTEROID_VERTICES)]
 
-	# draw the asteroid using pygame.draw.circle
+	def outline(self):
+		step = 360 / len(self.vertex_scales)
+		return [
+			self.position + pygame.Vector2(0, self.radius * scale).rotate(i * step)
+			for i, scale in enumerate(self.vertex_scales)
+		]
+
 	def draw(self, screen):
-		pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
+		pygame.draw.polygon(screen, "white", self.outline(), LINE_WIDTH)
 
 	def update(self, dt):
 		self.position += self.velocity * dt
