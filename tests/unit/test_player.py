@@ -6,6 +6,7 @@ from classes.player import Player
 from classes.shot import Shot
 from util.constants import (
     PLAYER_ACCELERATION,
+    PLAYER_DRAG,
     PLAYER_MAX_SPEED,
     PLAYER_RADIUS,
     PLAYER_RESPAWN_INVULN_SECONDS,
@@ -103,7 +104,13 @@ class TestPlayerDrag(unittest.TestCase):
         self.update_with_keys(1 / 60, pygame.K_s)
         self.assertGreater(self.player.velocity.length(), 100)
 
-    def test_coasting_slows_ship(self):
+    def test_coasting_applies_drag(self):
+        self.player.velocity = pygame.Vector2(0, 100)
+        self.update_with_keys(1 / 60)
+        self.assertAlmostEqual(self.player.velocity.length(), 100 * PLAYER_DRAG ** (1 / 60), places=4)
+
+    @patch('classes.player.PLAYER_DRAG', 0.5)
+    def test_coasting_with_drag_slows_ship(self):
         self.player.velocity = pygame.Vector2(0, 100)
         self.update_with_keys(1 / 60)
         self.assertLess(self.player.velocity.length(), 100)
