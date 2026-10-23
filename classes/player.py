@@ -85,7 +85,9 @@ class Player(CircleShape):
 		if keys[pygame.K_SPACE]:
 			self.shoot()
 
-		self.velocity *= PLAYER_DRAG ** dt
+		# Drag only slows a coasting ship; while thrusting, PLAYER_MAX_SPEED is the limit
+		if not (keys[pygame.K_w] or keys[pygame.K_s]):
+			self.velocity *= PLAYER_DRAG ** dt
 		self.position += self.velocity * dt
 		self.wrap_position()
 
@@ -117,7 +119,7 @@ class Player(CircleShape):
 		else:
 			self.shot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
 			shot = Shot(self.position.x, self.position.y, SHOT_RADIUS)
-			shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+			shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED + self.velocity
 
 	def is_vulnerable(self):
 		return self.invulnerable_timer <= 0
