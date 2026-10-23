@@ -10,6 +10,7 @@ from util.constants import (
     PLAYER_RADIUS,
     PLAYER_RESPAWN_INVULN_SECONDS,
     PLAYER_SHOOT_COOLDOWN_SECONDS,
+    PLAYER_SHOOT_SPEED,
     PLAYER_TURN_SPEED,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -139,6 +140,44 @@ class TestPlayerShootCooldown(unittest.TestCase):
 
     def test_initial_cooldown_is_zero(self):
         self.assertEqual(self.player.shot_cooldown, 0)
+
+
+class TestPlayerShotVelocity(unittest.TestCase):
+
+    def setUp(self):
+        self.shot_group = pygame.sprite.Group()
+        Shot.containers = (self.shot_group,)
+        self.player = Player(400, 300)
+        self.player.rotation = 0
+
+    def tearDown(self):
+        Shot.containers = ()
+
+    def fire(self):
+        self.player.shoot()
+        return next(iter(self.shot_group))
+
+    def test_stationary_ship_fires_at_shoot_speed(self):
+        shot = self.fire()
+        self.assertAlmostEqual(shot.velocity.x, 0, places=4)
+        self.assertAlmostEqual(shot.velocity.y, PLAYER_SHOOT_SPEED, places=4)
+
+    def test_shot_adds_forward_ship_velocity(self):
+        self.player.velocity = pygame.Vector2(0, PLAYER_MAX_SPEED)
+        shot = self.fire()
+        self.assertAlmostEqual(shot.velocity.y, PLAYER_SHOOT_SPEED + PLAYER_MAX_SPEED, places=4)
+
+    def test_shot_adds_sideways_ship_velocity(self):
+        self.player.velocity = pygame.Vector2(120, 0)
+        shot = self.fire()
+        self.assertAlmostEqual(shot.velocity.x, 120, places=4)
+        self.assertAlmostEqual(shot.velocity.y, PLAYER_SHOOT_SPEED, places=4)
+
+    def test_shot_does_not_share_ship_velocity_vector(self):
+        self.player.velocity = pygame.Vector2(0, 100)
+        shot = self.fire()
+        self.player.velocity.y = 999
+        self.assertAlmostEqual(shot.velocity.y, PLAYER_SHOOT_SPEED + 100, places=4)
 
 
 class TestPlayerInvulnerability(unittest.TestCase):

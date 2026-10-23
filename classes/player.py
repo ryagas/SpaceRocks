@@ -119,7 +119,7 @@ class Player(CircleShape):
 		else:
 			self.shot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
 			shot = Shot(self.position.x, self.position.y, SHOT_RADIUS)
-			shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+			shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED + self.velocity
 
 	def is_vulnerable(self):
 		return self.invulnerable_timer <= 0
