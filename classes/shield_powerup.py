@@ -3,6 +3,7 @@ import pygame
 from classes.circleshape import CircleShape
 from util.constants import (
 	LINE_WIDTH,
+	OBJECT_FILL_COLOR,
 	SHIELD_COLOR,
 	SHIELD_POWERUP_LIFETIME_SECONDS,
 	SHIELD_POWERUP_RADIUS,
@@ -20,6 +21,7 @@ class ShieldPowerUp(CircleShape):
 			blink_on = int(self.lifetime * 10) % 2 == 0
 			if not blink_on:
 				return
+		pygame.draw.circle(screen, OBJECT_FILL_COLOR, self.position, self.radius)
 		pygame.draw.circle(screen, SHIELD_COLOR, self.position, self.radius, LINE_WIDTH)
 		pygame.draw.circle(screen, SHIELD_COLOR, self.position, self.radius / 2, LINE_WIDTH)
 

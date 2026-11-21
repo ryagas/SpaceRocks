@@ -6,6 +6,7 @@ from util.constants import (
     ASTEROID_LUMPINESS,
     ASTEROID_MIN_RADIUS,
     ASTEROID_VERTICES,
+    OBJECT_FILL_COLOR,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -64,6 +65,15 @@ class TestAsteroidShape(unittest.TestCase):
         a = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
         a.draw(None)
         self.assertEqual(mock_polygon.call_args.args[2], a.outline())
+
+
+class TestAsteroidOpacity(unittest.TestCase):
+
+    def test_interior_hides_background(self):
+        screen = pygame.Surface((200, 200))
+        screen.fill((40, 80, 120))
+        Asteroid(100, 100, ASTEROID_MIN_RADIUS * 2).draw(screen)
+        self.assertEqual(screen.get_at((100, 100))[:3], OBJECT_FILL_COLOR)
 
 
 class TestAsteroidMovement(unittest.TestCase):

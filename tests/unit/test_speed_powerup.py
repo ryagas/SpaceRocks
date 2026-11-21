@@ -5,6 +5,7 @@ from classes.player import Player
 from classes.speed_powerup import SpeedPowerUp
 from classes.speed_powerup_spawner import SpeedPowerUpSpawner
 from util.constants import (
+    OBJECT_FILL_COLOR,
     PLAYER_RADIUS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -29,6 +30,16 @@ class TestSpeedPowerUpInit(unittest.TestCase):
     def test_lifetime_set_on_init(self):
         powerup = SpeedPowerUp(0, 0)
         self.assertEqual(powerup.lifetime, SPEED_POWERUP_LIFETIME_SECONDS)
+
+
+class TestSpeedPowerUpOpacity(unittest.TestCase):
+
+    def test_area_beside_bolt_hides_background(self):
+        screen = pygame.Surface((200, 200))
+        screen.fill((40, 80, 120))
+        SpeedPowerUp(100, 100).draw(screen)
+        beside_bolt = 100 + round(SPEED_POWERUP_RADIUS * 0.6)
+        self.assertEqual(screen.get_at((beside_bolt, 100))[:3], OBJECT_FILL_COLOR)
 
 
 class TestSpeedPowerUpLifetime(unittest.TestCase):

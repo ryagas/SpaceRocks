@@ -2,7 +2,7 @@ import random
 import pygame
 from classes.circleshape import CircleShape
 from classes.explosion import create_explosion
-from util.constants import ASTEROID_LUMPINESS, ASTEROID_MIN_RADIUS, ASTEROID_VERTICES, LINE_WIDTH
+from util.constants import ASTEROID_LUMPINESS, ASTEROID_MIN_RADIUS, ASTEROID_VERTICES, LINE_WIDTH, OBJECT_FILL_COLOR
 from util.logger import log_event
 
 
@@ -20,7 +20,9 @@ class Asteroid(CircleShape):
 		]
 
 	def draw(self, screen):
-		pygame.draw.polygon(screen, "white", self.outline(), LINE_WIDTH)
+		outline = self.outline()
+		pygame.draw.polygon(screen, OBJECT_FILL_COLOR, outline)
+		pygame.draw.polygon(screen, "white", outline, LINE_WIDTH)
 
 	def update(self, dt):
 		self.position += self.velocity * dt

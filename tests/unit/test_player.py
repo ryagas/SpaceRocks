@@ -5,6 +5,7 @@ import pygame
 from classes.player import Player
 from classes.shot import Shot
 from util.constants import (
+    OBJECT_FILL_COLOR,
     PLAYER_ACCELERATION,
     PLAYER_DRAG,
     PLAYER_MAX_SPEED,
@@ -345,6 +346,18 @@ class TestPlayerShieldDraw(unittest.TestCase):
     def test_draw_shows_no_shield_bubble_without_shield(self):
         self.player.draw(self.screen)
         self.assertEqual(self.count_shield_pixels(), 0)
+
+
+class TestPlayerOpacity(unittest.TestCase):
+
+    def test_interior_hides_background(self):
+        player = Player(100, 100)
+        player.invulnerable_timer = 0
+        screen = pygame.Surface((200, 200))
+        screen.fill((40, 80, 120))
+        player.draw(screen)
+        centroid = sum(player.triangle(), pygame.Vector2(0, 0)) / 3
+        self.assertEqual(screen.get_at((round(centroid.x), round(centroid.y)))[:3], OBJECT_FILL_COLOR)
 
 
 class TestPlayerSpeedBoost(unittest.TestCase):
