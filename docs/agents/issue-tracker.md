@@ -13,7 +13,7 @@ Issues and specs for this repo live in beads, a local issue tracker stored under
 - **Claim**: `bd update <id> --claim` (sets assignee to you and status to `in_progress`).
 - **Comment on an issue**: `bd comments add <id> "..."`, or `bd comments add <id> -f tmp/<file>.md` for long text.
 - **Apply / remove labels**: `bd label add <id> <label>` / `bd label remove <id> <label>`.
-- **Close**: `bd close <id> --reason "..."`.
+- **Close**: only the user closes issues. When work is done, add a comment with what was done and leave the issue open for the user to close with `bd close <id> --reason "..."`.
 
 ## When a skill says "publish to the issue tracker"
 
@@ -32,4 +32,4 @@ Used by `/wayfinder`. The **map** is a single epic with **child** issues as tick
 - **Blocking**: see **Blocking** under Conventions.
 - **Frontier query**: `bd ready --parent <map-id> --json`; first in map order wins.
 - **Claim**: `bd update <id> --claim`, the session's first write.
-- **Resolve**: `bd comments add <id> "<answer>"`, then `bd close <id> --reason "..."`, then append a context pointer (gist + ID) to the map's Decisions-so-far with `bd update <map-id> --description ...` (or `--append-notes`).
+- **Resolve**: `bd comments add <id> "<answer>"`, leave the ticket open for the user to close (see **Close**), then append a context pointer (gist + ID) to the map's Decisions-so-far with `bd update <map-id> --description ...` (or `--append-notes`).
