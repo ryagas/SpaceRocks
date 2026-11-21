@@ -1,7 +1,7 @@
 import unittest
 import pygame
 from classes.shot import Shot
-from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT, SHOT_RADIUS
+from util.constants import OBJECT_FILL_COLOR, SCREEN_WIDTH, SCREEN_HEIGHT, SHOT_RADIUS
 
 
 class TestShotInit(unittest.TestCase):
@@ -74,6 +74,15 @@ class TestShotScreenWrapping(unittest.TestCase):
         s.wrap_position()
         self.assertAlmostEqual(s.position.x, 400)
         self.assertAlmostEqual(s.position.y, 300)
+
+
+class TestShotOpacity(unittest.TestCase):
+
+    def test_interior_hides_background(self):
+        screen = pygame.Surface((200, 200))
+        screen.fill((40, 80, 120))
+        Shot(100, 100, SHOT_RADIUS).draw(screen)
+        self.assertEqual(screen.get_at((100, 100))[:3], OBJECT_FILL_COLOR)
 
 
 if __name__ == "__main__":

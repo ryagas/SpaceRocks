@@ -1,6 +1,6 @@
 import pygame
 from classes.circleshape import CircleShape
-from util.constants import LINE_WIDTH, SHOT_RADIUS
+from util.constants import LINE_WIDTH, OBJECT_FILL_COLOR, SHOT_RADIUS
 
 
 class Shot(CircleShape):
@@ -8,6 +8,7 @@ class Shot(CircleShape):
 		super().__init__(x, y, radius)
 
 	def draw(self, screen):
+		pygame.draw.circle(screen, OBJECT_FILL_COLOR, self.position, self.radius)
 		pygame.draw.circle(screen, "yellow", self.position, self.radius, LINE_WIDTH)
 
 	def update(self, dt):

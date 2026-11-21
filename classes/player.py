@@ -7,6 +7,7 @@ from classes.particle import Particle
 from classes.shot import Shot
 from util.constants import (
 	LINE_WIDTH,
+	OBJECT_FILL_COLOR,
 	PLAYER_ACCELERATION,
 	PLAYER_DRAG,
 	PLAYER_MAX_SPEED,
@@ -54,7 +55,9 @@ class Player(CircleShape):
 			if not blink_on:
 				return
 		color = SPEED_POWERUP_COLOR if self.is_speed_boosted() else "white"
-		pygame.draw.polygon(screen, color, self.triangle(), LINE_WIDTH)
+		triangle = self.triangle()
+		pygame.draw.polygon(screen, OBJECT_FILL_COLOR, triangle)
+		pygame.draw.polygon(screen, color, triangle, LINE_WIDTH)
 
 	def draw_shield(self, screen):
 		if self.shield_timer < SHIELD_WARNING_SECONDS:

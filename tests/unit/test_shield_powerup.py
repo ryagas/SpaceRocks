@@ -3,6 +3,7 @@ import pygame
 from classes.player import Player
 from classes.shield_powerup import ShieldPowerUp
 from util.constants import (
+    OBJECT_FILL_COLOR,
     SHIELD_DURATION_SECONDS,
     SHIELD_POWERUP_LIFETIME_SECONDS,
     SHIELD_POWERUP_RADIUS,
@@ -76,6 +77,16 @@ class TestShieldPowerUpPickup(unittest.TestCase):
     def test_pick_up_removes_powerup_from_play(self):
         self.powerup.pick_up(self.player)
         self.assertNotIn(self.powerup, self.group)
+
+
+class TestShieldPowerUpOpacity(unittest.TestCase):
+
+    def test_area_between_rings_hides_background(self):
+        screen = pygame.Surface((200, 200))
+        screen.fill((40, 80, 120))
+        ShieldPowerUp(100, 100).draw(screen)
+        between_rings = 100 + round(SHIELD_POWERUP_RADIUS * 0.75)
+        self.assertEqual(screen.get_at((between_rings, 100))[:3], OBJECT_FILL_COLOR)
 
 
 if __name__ == "__main__":

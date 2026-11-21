@@ -3,6 +3,7 @@ import pygame
 from classes.circleshape import CircleShape
 from util.constants import (
 	LINE_WIDTH,
+	OBJECT_FILL_COLOR,
 	SPEED_POWERUP_COLOR,
 	SPEED_POWERUP_LIFETIME_SECONDS,
 	SPEED_POWERUP_RADIUS,
@@ -18,6 +19,7 @@ class SpeedPowerUp(CircleShape):
 		self.lifetime = SPEED_POWERUP_LIFETIME_SECONDS
 
 	def draw(self, screen):
+		pygame.draw.circle(screen, OBJECT_FILL_COLOR, self.position, self.radius)
 		pygame.draw.circle(screen, SPEED_POWERUP_COLOR, self.position, self.radius, LINE_WIDTH)
 		bolt = [self.position + pygame.Vector2(x, y) * self.radius for x, y in self.bolt_shape]
 		pygame.draw.polygon(screen, SPEED_POWERUP_COLOR, bolt)
