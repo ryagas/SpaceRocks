@@ -53,6 +53,9 @@ LIVES_POSITION = (10, 130)      # Below high score
 import pathlib  # noqa: E402 -- kept adjacent to its sole use below
 HIGH_SCORE_FILE = str(pathlib.Path(__file__).parent.parent / "highscore.json")  # Anchored to project root
 
+# Background
+BACKGROUND_IMAGE = str(pathlib.Path(__file__).parent.parent / "assets" / "background.jpg")  # Anchored to project root
+
 # Shield Power-up
 SHIELD_POWERUP_RADIUS = 12              # Size of the collectible pickup
 SHIELD_POWERUP_SPAWN_SECONDS = 20.0     # Time between pickup spawns

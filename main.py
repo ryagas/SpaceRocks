@@ -3,7 +3,8 @@ from classes.asteroid import Asteroid
 from classes.asteroidfield import AsteroidField
 from score_display import ScoreDisplay
 from util.logger import log_event, log_score_added, log_state
-from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES
+from util.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_LIVES, BACKGROUND_IMAGE
+from util.background import load_background
 from classes.player import Player
 from classes.shot import Shot
 from classes.score_manager import ScoreManager
@@ -20,6 +21,7 @@ def main():
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    background = load_background(BACKGROUND_IMAGE, (SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     dt = 0
     updatable = pygame.sprite.Group()
@@ -58,7 +60,7 @@ def main():
             if event.type == pygame.QUIT:
                 score_manager.check_and_save_high_score()
                 return
-        screen.fill("black")
+        screen.blit(background, (0, 0))
         for entity in updatable:
             entity.update(dt)
         for entity in drawable:
